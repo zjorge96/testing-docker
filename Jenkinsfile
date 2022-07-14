@@ -23,12 +23,12 @@ pipeline {
             }
         }
         stage('Deploy') {
+            environment {
+                dockerhub = credentials('dockerhub')
+            }
             steps {
                 echo 'Deploying..'
-                environment {
-                    DOCKERHUB_CRED = credentials('dockerhub')
-                }
-                sh "echo ${DOCKERHUB_CRED_PSW} | docker login -u ${DOCKERHUB_CRED_USR} --password-stdin" // Logs into dockerhub
+                sh "echo ${dockerhub_PSW} | docker login -u ${dockerhub_USR} --password-stdin" // Logs into dockerhub
                 sh "docker push zjliatrio/realworld_frontend:${F_VERSION}" // Pushes the frontend image to DockerHub
                 sh "docker push zjliatrio/realworld_backend:${B_VERSION}" // Pushes the backend image to DockerHub
             }
