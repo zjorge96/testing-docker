@@ -42,7 +42,7 @@ pipeline {
         stage('Cleanup') {
             steps {
                 echo 'Cleaning up..'
-                sh "docker rm $(docker ps -a -q)" // Removes all containers
+                sh "docker rm --force $(docker ps -a -q)" // Removes all containers
                 sh "docker rmi zjliatrio/realworld_frontend" // Removes frontend image
                 sh "docker rmi zjliatrio/realworld_backend" // Removes backend image
                 // sh "docker rmi $(docker images -q)" // Removes all images
