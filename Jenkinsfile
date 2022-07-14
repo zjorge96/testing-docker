@@ -21,24 +21,31 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Testing..'
-                sh 'make test' // Runs tests through go
+                sh "docker run -d zjliatrio/realworld_frontend:${F_VERSION}" // Runs the frontend image
+                sh "docker run -d zjliatrio/realworld_backend:${B_VERSION}" // Runs the backend image
+
             }
         }
         stage('Deploy') {
             environment {
-                GITHUB_TOKEN = credentials('GitLogin') // Make sure to set a PAT in credentials
+                // GITHUB_TOKEN = credentials('GitLogin') // Make sure to set a PAT in credentials
             }
             steps {
-                script {
-                    if (env.BRANCH_NAME == 'master') {
-                        echo 'Deploying..'
-                        sh 'make release' // Runs goreleaser and releases the tag
-
-                    } else {
-                        echo 'Not master branch. Nothing to deploy.'
-                    }
+                echo 'Deploying..'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'DOCKERHUB_PASSWORD', usernameVariable: 'DOCKERHUB_USERNAME')]) {
+                    sh "docker login -u ${DOCKERHUB_USERNAME} -p ${DOCKERHUB_PASSWORD}" // Logs into dockerhub
+                    sh "docker push zjliatrio/realworld_frontend:${F_VERSION}" // Pushes the frontend image to DockerHub
+                    sh "docker push zjliatrio/realworld_backend:${B_VERSION}" // Pushes the backend image to DockerHub
                 }
-                
+            }
+        }
+        stage('Cleanup') {
+            steps {
+                echo 'Cleaning up..'
+                sh "docker rm $(docker ps -a -q)" // Removes all containers
+                sh "docker rmi zjliatrio/realworld_frontend" // Removes frontend image
+                sh "docker rmi zjliatrio/realworld_backend" // Removes backend image
+                // sh "docker rmi $(docker images -q)" // Removes all images
             }
         }
     }
