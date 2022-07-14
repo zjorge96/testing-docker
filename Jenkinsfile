@@ -6,10 +6,6 @@ pipeline {
         F_VERSION = '1.0.0' // Semantic versioning for the frontend
         B_VERSION = '1.0.0' // Semantic versioning for the backend
     }
-    
-    tools { // Used to set tool configuration tools to use in the pipeline
-        // go "${GO_NAME}"
-    }
 
     stages {
         stage('Build') {
@@ -28,9 +24,6 @@ pipeline {
             }
         }
         stage('Deploy') {
-            environment {
-                // GITHUB_TOKEN = credentials('GitLogin') // Make sure to set a PAT in credentials
-            }
             steps {
                 echo 'Deploying..'
                 withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS}", passwordVariable: 'DOCKERHUB_PASSWORD', usernameVariable: 'DOCKERHUB_USERNAME')]) {
